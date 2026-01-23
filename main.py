@@ -11,7 +11,8 @@ TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID')
 # join_date format: YYYY-MM-DD (Saal-Mahina-Din)
 database = [
     {"name": "Rohit_Tech", "link": "https://blueroseone.com/publish/wordsbrew/", "join_date": "2026-01-20", "plan": "Free"},
-    {"name": "Sneha_Vlogs", "link": "https://www.amazon.in/dp/B0CHX1W1XY", "join_date": "2026-01-15", "plan": "Paid"}
+    {"name": "Sneha_Vlogs", "link": "https://www.amazon.in/dp/B0CHX1W1XY", "join_date": "2026-01-15", "plan": "Paid"},
+    {"name": "Testing_User", "link": "https://www.amazon.in/dp/B0CHX_FAKE_LINK_123", "join_date": "2026-01-23", "plan": "Free"}
 ]
 
 def send_telegram_alert(message):
