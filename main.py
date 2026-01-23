@@ -17,8 +17,11 @@ database = [
 
 def send_telegram_alert(message):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message, "parse_mode": "Markdown"}
-    requests.post(url, data=payload)
+    # Is baar humne parse_mode hata diya hai taaki simple text jaye
+    payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message}
+    response = requests.post(url, data=payload)
+    print(f"Telegram Response: {response.text}") # Ye logs mein dikhayega ki error kya hai
+
 
 def check_link(url):
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'}
