@@ -1,23 +1,29 @@
 name: AI Link Scanner Pro
+
 on:
   schedule:
-    - cron: '30 3 * * *' # Roz subah 9:00 AM IST
-  workflow_dispatch: 
+    - cron: '30 3 * * *' # Roz subah 9:00 AM IST par chalega
+  workflow_dispatch:      # Manual button enable karne ke liye
 
 jobs:
   run-scanner:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
-      - name: Install dependencies
+
+      - name: Install Dependencies
         run: pip install requests
+
       - name: Run Scan
         env:
           SCRAPER_KEY: ${{ secrets.SCRAPER_KEY }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          SHEET_URL: ${{ secrets.SHEET_URL }}
         run: python main.py
