@@ -1,69 +1,55 @@
 import requests
 import os
+import csv
 from datetime import datetime, timedelta
 
-# --- SETTINGS (GitHub Secrets se automatic aayega) ---
+# --- SETTINGS ---
+SHEET_URL = "APNI_GOOGLE_SHEET_CSV_URL_YAHAN_DALO" # Niche batata hoon ye kahan se milega
 SCRAPER_API_KEY = os.environ.get('SCRAPER_KEY')
 TELEGRAM_TOKEN = os.environ.get('TELEGRAM_TOKEN')
 TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID')
 
-# --- DATABASE (Influencers ki list) ---
-# join_date format: YYYY-MM-DD (Saal-Mahina-Din)
-database = [
-    {"name": "Rohit_Tech", "link": "https://blueroseone.com/publish/wordsbrew/", "join_date": "2026-01-20", "plan": "Free"},
-    {"name": "Sneha_Vlogs", "link": "https://www.amazon.in/dp/B0CHX1W1XY", "join_date": "2026-01-15", "plan": "Paid"},
-    {"name": "Testing_User", "link": "https://www.amazon.in/dp/B0CHX_FAKE_LINK_123", "join_date": "2026-01-23", "plan": "Free"}
-]
+def get_sheet_data():
+    response = requests.get(SHEET_URL)
+    decoded_content = response.content.decode('utf-8')
+    cr = csv.DictReader(decoded_content.splitlines(), delimiter=',')
+    return list(cr)
 
-def send_telegram_alert(message):
+def send_telegram(msg):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    # Is baar humne parse_mode hata diya hai taaki simple text jaye
-    payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message}
-    response = requests.post(url, data=payload)
-    print(f"Telegram Response: {response.text}") # Ye logs mein dikhayega ki error kya hai
-
+    requests.post(url, data={"chat_id": TELEGRAM_CHAT_ID, "text": msg, "parse_mode": "Markdown"})
 
 def check_link(url):
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'}
-    # Stage 1: Normal Scan
-    try:
-        res = requests.get(url, headers=headers, timeout=15)
-        if res.status_code == 200: return "✅ ACTIVE"
-    except: pass
-    
-    # Stage 2: Deep Scan (ScraperAPI)
     proxy_url = f"http://api.scraperapi.com?api_key={SCRAPER_API_KEY}&url={url}"
     try:
         res = requests.get(proxy_url, timeout=30)
         if res.status_code == 200:
-            if "Currently unavailable" in res.text or "Out of Stock" in res.text:
-                return "⚠️ OUT OF STOCK"
-            return "✅ ACTIVE (Deep Scan)"
-        return f"❌ BROKEN ({res.status_code})"
+            if "Currently unavailable" in res.text: return "⚠️ OUT OF STOCK"
+            return "✅ ACTIVE"
+        return "❌ BROKEN"
     except: return "🚨 DOWN"
 
-# --- RUNNER ---
+# --- MAIN ENGINE ---
 today = datetime.now()
-print(f"Starting Scan: {today.strftime('%Y-%m-%d %H:%M')}")
+data = get_sheet_data()
 
-for user in database:
-    # 1. Expiry Check Logic
-    join_dt = datetime.strptime(user['join_date'], "%Y-%m-%d")
-    days_limit = 7 if user['plan'] == "Free" else 30
-    expiry_dt = join_dt + timedelta(days=days_limit)
-    days_left = (expiry_dt - today).days
+for row in data:
+    name = row['Name']
+    link = row['Link']
+    plan = row['Plan']
+    join_dt = datetime.strptime(row['Join_Date'], "%Y-%m-%d")
+    
+    # Plan Limit
+    limit = 7 if plan == "Free" else 30
+    expiry_dt = join_dt + timedelta(days=limit)
+    
+    if today > expiry_dt:
+        # Plan Expired: Data sheet mein rahega, par scan nahi hoga
+        print(f"Skipping {name}: Plan Expired")
+        send_telegram(f"🚫 *SCAN STOPPED*\nUser: {name}\nReason: Plan Expired. Bhai payment mang lo!")
+        continue
 
-    # Alert if Plan Expired or Expiring soon
-    if days_left == 0:
-        send_telegram_alert(f"⏰ *PLAN EXPIRING TODAY*\nUser: {user['name']}\nPlan: {user['plan']}\nBhai, isse payment mang lo!")
-    elif days_left < 0:
-        print(f"Skipping {user['name']} - Plan Expired.")
-        continue 
-
-    # 2. Link Status Check
-    status = check_link(user['link'])
-    print(f"Result for {user['name']}: {status}")
-
+    # Agar Plan Active hai, tabhi scan karo
+    status = check_link(link)
     if "✅" not in status:
-        alert_msg = f"❗ *LINK ISSUE DETECTED*\n\n*User:* {user['name']}\n*Status:* {status}\n*Link:* {user['link']}\n\n_Check karke influencer ko update karo!_"
-        send_telegram_alert(alert_msg)
+        send_telegram(f"❗ *ISSUE*: {name}\nStatus: {status}\nLink: {link}")
