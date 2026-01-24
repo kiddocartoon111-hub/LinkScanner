@@ -34,41 +34,57 @@ def check_link(url):
     try:
         res = requests.get(proxy_url, timeout=30)
         if res.status_code == 200:
-            if "Currently unavailable" in res.text or "kuch_aur_error_text" in res.text:
+            if "Currently unavailable" in res.text:
                 return "🚨 OUT OF STOCK"
             return "✅ ACTIVE"
-        return f"❌ BROKEN (Status: {res.status_code})"
+        return f"❌ BROKEN ({res.status_code})"
     except:
         return "🚨 SERVER DOWN"
 
 # --- MAIN ENGINE ---
-print("Starting Link Scanner...")
+print("🚀 Launching Link Scanner Pro...")
 data = get_sheet_data()
 today = datetime.now()
 
 for row in data:
-    name = row.get('Name')
-    link = row.get('Link')
-    plan = row.get('Plan')
-    join_date_str = row.get('Join_Date')
+    name = row.get('Name', 'Unknown')
+    link = row.get('Link', '')
+    plan = row.get('Plan', 'Free').strip()
+    join_date_str = row.get('Join_Date', '')
 
-    if not name or not link: continue
-
-    # Expiry Logic
-    join_dt = datetime.strptime(join_date_str, "%Y-%m-%d")
-    limit = 7 if plan.lower() == "free" else 30
-    expiry_dt = join_dt + timedelta(days=limit)
-
-    if today > expiry_dt:
-        print(f"Skipping {name}: Plan Expired")
-        send_telegram(f"🚫 *SCAN STOPPED*\n\n*User:* {name}\n*Reason:* Plan Expired ({plan})\n*Action:* Please renew payment to resume scanning.")
+    if not link or not join_date_str:
         continue
 
-    # Plan active hai, toh scan karo
-    print(f"Scanning {name}...")
+    # --- SUBSCRIPTION LOGIC ---
+    try:
+        join_dt = datetime.strptime(join_date_str, "%Y-%m-%d")
+    except:
+        print(f"Invalid Date Format for {name}. Use YYYY-MM-DD")
+        continue
+
+    # Plan ke hisaab se expiry set karein
+    plan_lower = plan.lower()
+    if "early" in plan_lower:
+        limit_days = 365
+    elif "paid" in plan_lower:
+        limit_days = 30
+    else: # Default: Free
+        limit_days = 7
+        
+    expiry_dt = join_dt + timedelta(days=limit_days)
+
+    # Check if Plan is Expired
+    if today > expiry_dt:
+        print(f"🚫 Plan Expired for {name} ({plan})")
+        # Har 1-2 din mein alert bhejega jab tak date change na ho
+        send_telegram(f"⚠️ *PLAN EXPIRED ALERT*\n\n*User:* {name}\n*Plan:* {plan}\n*Status:* Scanning Stopped\n\nBhai, iska subscription khatam ho gaya hai. Payment renew karne ko bolo!")
+        continue
+
+    # --- SCANNING (Sirf Active Plans ke liye) ---
+    print(f"🔍 Checking: {name}...")
     status = check_link(link)
     
     if "✅" not in status:
-        send_telegram(f"❗ *LINK ISSUE DETECTED*\n\n*User:* {name}\n*Status:* {status}\n*Link:* {link}")
+        send_telegram(f"❗ *LINK ISSUE*: {name}\n*Status*: {status}\n*Link*: {link}")
 
-print("Scan Task Completed!")
+print("✅ All tasks finished!")
