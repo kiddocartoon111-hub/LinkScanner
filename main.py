@@ -109,4 +109,4 @@ for row in data:
 
     time.sleep(1) # Chhota gap requests ke beech
 
-print("✅ All tasks finished!")http://api.scraperapi.com?api_key={SCRAPER_API_KEY}&url={url}&render=true
+print("✅ All tasks finished!")
