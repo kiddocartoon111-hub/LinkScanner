@@ -77,7 +77,7 @@ for row in data:
     # --- Subscription Logic ---
     try:
         join_dt = datetime.strptime(join_date_str, "%Y-%m-%d")
-        plan_days = {"early": 365, "paid": 30, "free": 7}
+        plan_days = {"Early Access": 365, "Monthly": 30, "7-Day Trial": 7}
         limit_days = plan_days.get(plan, 7)
         expiry_dt = join_dt + timedelta(days=limit_days)
     except:
