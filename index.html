@@ -7,6 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .hidden { display: none; }
+        /* Plan select hone par blue border dikhane ke liye */
+        input[type="radio"]:checked + div { border-color: #2563eb; background-color: #eff6ff; }
     </style>
 </head>
 <body class="bg-gray-50 font-sans">
@@ -17,76 +19,86 @@
             <p class="text-gray-600 mt-2">Professional Link Monitoring for Influencers</p>
         </div>
 
-        <div class="bg-white p-8 rounded-2xl shadow-lg">
+        <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
             <form id="saas-form" class="space-y-6">
                 
                 <div>
-                    <label class="block text-gray-700 font-medium mb-2">Full Name</label>
+                    <label class="block text-gray-700 font-semibold mb-2 text-sm">Full Name</label>
                     <input type="text" name="Name" required placeholder="Aapka Naam" 
-                           class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                           class="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition">
                 </div>
 
                 <div>
-                    <label class="block text-gray-700 font-medium mb-2">Instagram Username</label>
+                    <label class="block text-gray-700 font-semibold mb-2 text-sm">Instagram Username</label>
                     <input type="text" name="Instagram" required placeholder="@username" 
-                           class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                           class="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition">
                 </div>
 
                 <div>
-                    <label class="block text-gray-700 font-medium mb-2">Links (Comma lagakar likhein)</label>
+                    <label class="block text-gray-700 font-semibold mb-2 text-sm">Links to Monitor (Comma separated)</label>
                     <textarea name="Links" required placeholder="https://link1.com, https://link2.com" 
-                              class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none h-24"></textarea>
+                              class="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none h-24 transition"></textarea>
                 </div>
 
                 <div>
-                    <label class="block text-gray-700 font-medium mb-2">WhatsApp Number</label>
+                    <label class="block text-gray-700 font-semibold mb-2 text-sm">WhatsApp Number</label>
                     <input type="tel" name="WhatsApp" required placeholder="91XXXXXXXXXX" 
-                           class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                           class="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition">
                 </div>
 
                 <div>
-                    <label class="block text-gray-700 font-medium mb-4 text-center font-bold text-lg">Select Your Plan</label>
-                    <div class="grid grid-cols-1 gap-4">
-                        <label class="relative border-2 rounded-xl p-4 flex flex-col items-center cursor-pointer hover:border-blue-500 transition border-blue-600 bg-blue-50">
-                            <input type="radio" name="Plan" value="7-Day Trial" checked class="hidden">
-                            <span class="font-bold text-gray-800">7-Day Trial</span>
-                            <span class="text-sm text-gray-500">5 Links | ₹0</span>
+                    <label class="block text-gray-700 font-bold mb-4 text-center text-lg">Choose Your Plan</label>
+                    <div class="space-y-3">
+                        <label class="block cursor-pointer">
+                            <input type="radio" name="Plan" value="7-Day Trial" checked class="hidden peer">
+                            <div class="border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center transition peer-checked:border-blue-600 peer-checked:bg-blue-50">
+                                <span class="font-bold text-gray-800">7-Day Trial</span>
+                                <span class="text-sm text-gray-500">5 Links | ₹0</span>
+                            </div>
                         </label>
-                        <label class="relative border-2 rounded-xl p-4 flex flex-col items-center cursor-pointer hover:border-blue-500 transition border-gray-200">
-                            <input type="radio" name="Plan" value="Monthly" class="hidden">
-                            <span class="font-bold text-gray-800">Monthly</span>
-                            <span class="text-sm text-gray-500">40 Links | ₹499</span>
+                        <label class="block cursor-pointer">
+                            <input type="radio" name="Plan" value="Monthly" class="hidden peer">
+                            <div class="border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center transition peer-checked:border-blue-600 peer-checked:bg-blue-50">
+                                <span class="font-bold text-gray-800">Monthly</span>
+                                <span class="text-sm text-gray-500">40 Links | ₹499</span>
+                            </div>
+                        </label>
+                        <label class="block cursor-pointer">
+                            <input type="radio" name="Plan" value="Early Access" class="hidden peer">
+                            <div class="border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center transition peer-checked:border-blue-600 peer-checked:bg-blue-50">
+                                <span class="font-bold text-gray-800">Early Access</span>
+                                <span class="text-sm text-gray-500">100 Links | ₹3999</span>
+                            </div>
                         </label>
                     </div>
                 </div>
 
-                <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition duration-300">
+                <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition duration-300 transform active:scale-95">
                     Start Protection Now 🚀
                 </button>
 
             </form>
         </div>
-
-        <p class="text-center text-gray-400 mt-8 text-sm">© 2026 LinkGuard Pro. All Rights Reserved.</p>
+        <p class="text-center text-gray-400 mt-8 text-xs">© 2026 LinkGuard Pro. Data secured via Google Cloud.</p>
     </div>
 
-    <div id="successModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl text-center max-w-sm w-full">
-            <div class="mb-4 text-green-500">
-                <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+    <div id="successModal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl text-center max-w-sm w-full border border-gray-100">
+            <div class="mb-5 bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto text-green-500">
+                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
                 </svg>
             </div>
-            <h3 class="text-2xl font-bold text-gray-800 mb-2">Registration Successful!</h3>
-            <p class="text-gray-600 mb-6 text-sm">Aapka link monitoring system activate ho gaya hai. Hum aapko WhatsApp/Telegram par updates bhejenge.</p>
-            <button onclick="closeModal()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg transition">
-                Got it!
+            <h3 class="text-2xl font-bold text-gray-800 mb-2">Done!</h3>
+            <p class="text-gray-600 mb-6 text-sm">System activate ho gaya hai. Aapki links ab monitor ho rahi hain.</p>
+            <button onclick="closeModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition">
+                Perfect!
             </button>
         </div>
     </div>
 
     <script>
-        // Yahan tumhari purani Google Script URL hi rahegi
+        // Tumhara updated Script URL
         const scriptURL = 'https://script.google.com/macros/s/AKfycbzjLHga1FmmMvtsg4EdSOihcdmTdbJRB-sIcptgRlVg61xrtkG2MQEqxncY5yO_Aou6/exec';
         const form = document.getElementById('saas-form');
         const submitBtn = document.getElementById('submitBtn');
@@ -95,20 +107,19 @@
         form.addEventListener('submit', e => {
             e.preventDefault();
             
-            // Text change to "Submitting..."
+            // Text change to Submitting...
             submitBtn.disabled = true;
-            submitBtn.innerHTML = `Submitting...`; 
+            submitBtn.innerHTML = `<span class="inline-block animate-pulse">Submitting...</span>`;
 
             fetch(scriptURL, { method: 'POST', body: new FormData(form)})
                 .then(response => {
-                    modal.classList.remove('hidden'); // Show Professional Modal
+                    modal.classList.remove('hidden'); // Show Professional Popup
                     form.reset();
                     submitBtn.disabled = false;
                     submitBtn.innerText = "Start Protection Now 🚀";
                 })
                 .catch(error => {
-                    console.error('Error!', error.message);
-                    alert("System Error! Please check your connection.");
+                    alert("Network Error! Please check your internet.");
                     submitBtn.disabled = false;
                     submitBtn.innerText = "Start Protection Now 🚀";
                 });
@@ -118,6 +129,5 @@
             modal.classList.add('hidden');
         }
     </script>
-
 </body>
-</html>
+    </html>
