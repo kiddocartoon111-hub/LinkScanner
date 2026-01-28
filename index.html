@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkGuard Pro - Save Your Revenue</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 font-sans">
+
+    <header class="py-16 bg-white border-b">
+        <div class="container mx-auto px-6 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">LinkGuard Pro</h1>
+            <p class="text-xl text-gray-600 mb-8">Kya aapka 'Link in Bio' broken hai? Har minute aapka revenue leak ho raha hai.</p>
+            <a href="#get-started" class="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition">Get Started for Free</a>
+        </div>
+    </header>
+
+    <section class="py-20 container mx-auto px-6">
+        <div class="grid md:grid-cols-3 gap-12 text-center">
+            <div class="p-8 bg-white rounded-xl shadow-sm border">
+                <i class="fas fa-bolt text-4xl text-blue-500 mb-4"></i>
+                <h3 class="text-xl font-bold mb-2">Real-time Monitoring</h3>
+                <p class="text-gray-600">Hum har ghante aapke links check karte hain bina ruke.</p>
+            </div>
+            <div class="p-8 bg-white rounded-xl shadow-sm border">
+                <i class="fas fa-bell text-4xl text-green-500 mb-4"></i>
+                <h3 class="text-xl font-bold mb-2">WhatsApp Alerts</h3>
+                <p class="text-gray-600">Link toot-te hi turant alert message aapke phone par.</p>
+            </div>
+            <div class="p-8 bg-white rounded-xl shadow-sm border">
+                <i class="fas fa-shield-alt text-4xl text-purple-500 mb-4"></i>
+                <h3 class="text-xl font-bold mb-2">Revenue Insurance</h3>
+                <p class="text-gray-600">Aapki mehnat ka traffic kabhi waste nahi hoga.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="get-started" class="py-20 bg-blue-50">
+        <div class="max-w-2xl mx-auto px-6 bg-white p-10 rounded-2xl shadow-lg">
+            <h2 class="text-3xl font-bold text-center mb-8 text-gray-800">Fill Details & Choose Plan</h2>
+            <form id="saas-form" class="space-y-6">
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Instagram Username</label>
+                    <input type="text" name="Instagram" required placeholder="@username" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Links (Comma lagakar likhein)</label>
+                    <textarea name="Links" required placeholder="https://link1.com, https://link2.com" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">WhatsApp Number</label>
+                    <input type="text" name="WhatsApp" required placeholder="+91 XXXXX XXXXX" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="pt-6">
+                    <label class="block text-gray-700 font-bold mb-4 text-center">Select Your Plan</label>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="Plan" value="Free" class="hidden peer" checked>
+                            <div class="p-4 border-2 rounded-lg text-center peer-checked:border-blue-600 peer-checked:bg-blue-50 hover:bg-gray-50">
+                                <p class="font-bold">7-Day Trial</p>
+                                <p class="text-sm text-gray-500">5 Links | ₹0</p>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="Plan" value="Paid" class="hidden peer">
+                            <div class="p-4 border-2 rounded-lg text-center peer-checked:border-blue-600 peer-checked:bg-blue-50 hover:bg-gray-50">
+                                <p class="font-bold">Monthly</p>
+                                <p class="text-sm text-gray-500">40 Links | ₹499</p>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="Plan" value="Early" class="hidden peer">
+                            <div class="p-4 border-2 rounded-lg text-center peer-checked:border-blue-600 peer-checked:bg-blue-50 hover:bg-gray-50">
+                                <p class="font-bold">Early Access</p>
+                                <p class="text-sm text-gray-500">100 Links | ₹3999</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition transform hover:scale-105">
+                    Start Protection Now 🚀
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <footer class="py-10 text-center text-gray-500">
+        <p>&copy; 2026 LinkGuard Pro. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbxharpyvD521k1tZzrv0MEgkdYjSpCK4ZO4uHksZ_vkQLxXsHJIshf5I80YuD8BkPQz/exec'; // Yahan apna URL daalo
+        const form = document.getElementById('saas-form');
+
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            const plan = form.querySelector('input[name="Plan"]:checked').value;
+            
+            // Payment Logic (Demo)
+            if (plan !== 'Free') {
+                alert("Redirecting to Payment Gateway (Razorpay)...");
+                // Payment success hone par hi fetch call hogi
+            }
+
+            fetch(scriptURL, { method: 'POST', body: new FormData(form)})
+              .then(response => alert("Shukriya! Aapka link monitoring shuru ho gaya hai."))
+              .catch(error => console.error('Error!', error.message))
+        });
+    </script>
+</body>
+</html>
