@@ -1,112 +1,103 @@
-import requests
-import os
-import csv
-import time
+import requests, os, csv, time
 from datetime import datetime, timedelta
 
-# --- SETTINGS ---
-SHEET_URL = os.environ.get('SHEET_URL')
-SCRAPER_API_KEY = os.environ.get('SCRAPER_KEY')
-TELEGRAM_TOKEN = os.environ.get('TELEGRAM_TOKEN')
-TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID')
+# ================= CONFIG =================
+SHEET_URL = os.getenv("SHEET_URL")
+SCRAPER_API_KEY = os.getenv("SCRAPER_KEY")
+TG_TOKEN = os.getenv("TELEGRAM_TOKEN")
+TG_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
-def send_telegram(msg):
-    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    payload = {"chat_id": TELEGRAM_CHAT_ID, "text": msg, "parse_mode": "Markdown"}
-    try:
-        requests.post(url, data=payload, timeout=10)
-    except Exception as e:
-        print(f"Telegram Error: {e}")
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (LinkGuardBot/1.0)"
+}
 
-def first_check(url):
-    """Pahla check: Normal Request"""
-    try:
-        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
-        res = requests.get(url, headers=headers, timeout=15, allow_redirects=True)
-        if res.status_code == 200:
-            return True, "OK"
-        return False, f"Status {res.status_code}"
-    except Exception as e:
-        return False, "Connection Error"
+BROKEN_WORDS = [
+    "page not found",
+    "404",
+    "currently unavailable",
+    "out of stock",
+    "link expired",
+    "sorry, this page isn't available"
+]
 
-def deep_scan(url):
-    """Doosra check: Scraper API (JS Rendering)"""
-    proxy_url = f"http://api.scraperapi.com?api_key={SCRAPER_API_KEY}&url={url}&render=true&premium=true"
-    broken_indicators = ["page not found", "404 error", "sorry, this page isn't available", "currently unavailable", "link expired"]
-    
+PLAN_DAYS = {
+    "7-day trial": 7,
+    "monthly": 30,
+    "early access": 365
+}
+
+# ================= HELPERS =================
+def tg(msg):
+    url = f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage"
+    requests.post(url, data={"chat_id": TG_CHAT_ID, "text": msg})
+
+def normal_check(url):
     try:
-        res = requests.get(proxy_url, timeout=60)
-        if res.status_code == 200:
-            content_lower = res.text.lower()
-            for word in broken_indicators:
-                if word in content_lower:
-                    return False, f"Broken Content ({word})"
-            return True, "Active"
-        return False, f"API Status {res.status_code}"
+        r = requests.get(url, headers=HEADERS, timeout=15)
+        return r.status_code == 200, r.text.lower()
     except:
-        return False, "API Timeout"
+        return False, ""
 
-# --- MAIN ENGINE ---
-print("🚀 Launching Smart Link Scanner...")
-
-# 1. Google Sheet Data Download
-data = []
-try:
-    response = requests.get(SHEET_URL)
-    response.raise_for_status()
-    decoded_content = response.content.decode('utf-8')
-    cr = csv.DictReader(decoded_content.splitlines(), delimiter=',')
-    data = list(cr)
-    print(f"✅ Loaded {len(data)} links from sheet.")
-except Exception as e:
-    print(f"❌ Sheet Download Error: {e}")
-    send_telegram(f"🚨 *CRITICAL ERROR*: Google Sheet download nahi ho rahi!")
-
-# 2. Processing Links
-today = datetime.now()
-
-for row in data:
-    name = row.get('Name', 'Unknown')
-    link = row.get('Link', '').strip()
-    plan = row.get('Plan', 'Free').strip().lower()
-    join_date_str = row.get('Join_Date', '').strip()
-
-    if not link or not join_date_str:
-        continue
-
-    # --- Subscription Logic ---
+def deep_check(url):
+    api = f"http://api.scraperapi.com?api_key={SCRAPER_API_KEY}&url={url}&render=true"
     try:
-        join_dt = datetime.strptime(join_date_str, "%Y-%m-%d")
-        plan_days = {"Early Access": 365, "Monthly": 30, "7-Day Trial": 7}
-        limit_days = plan_days.get(plan, 7)
-        expiry_dt = join_dt + timedelta(days=limit_days)
+        r = requests.get(api, timeout=60)
+        return r.status_code == 200, r.text.lower()
+    except:
+        return False, ""
+
+def expired(plan, join_date):
+    days = PLAN_DAYS.get(plan.lower(), 7)
+    return datetime.now() > (join_date + timedelta(days=days))
+
+# ================= ENGINE =================
+print("🚀 LinkGuard Scanner Started")
+
+rows = []
+csv_data = requests.get(SHEET_URL).content.decode("utf-8")
+rows = list(csv.DictReader(csv_data.splitlines()))
+
+for row in rows:
+    try:
+        name = row["User_Name"]
+        insta = row["Instagram"]
+        phone = row["WhatsApp"]
+        plan = row["Plan"]
+        link_name = row["Link_Name"]
+        link = row["Link_URL"]
+        join_date = datetime.strptime(row["Join_Date"], "%Y-%m-%d")
     except:
         continue
 
-    if today > expiry_dt:
-        print(f"🚫 Plan Expired for {name}")
+    if expired(plan, join_date):
         continue
 
-    # --- Scanning Process ---
-    print(f"🔍 Checking: {name}...")
-    
-    # Step 1: Normal Check
-    is_ok, reason = first_check(link)
-    
-    if not is_ok:
-        print(f"⚠️ Normal check failed ({reason}). Starting Deep Scan via ScraperAPI...")
-        
-        # Step 2: Deep Scan (Only if Step 1 fails)
-        is_still_ok, final_reason = deep_scan(link)
-        
-        if not is_still_ok:
-            print(f"❌ Link is BROKEN for {name}")
-            send_telegram(f"🚨 *LINK ISSUE*: {name}\n🔗 *Link*: {link}\n📊 *Reason*: {final_reason}")
-        else:
-            print(f"✅ Deep Scan passed. Link is fine.")
+    ok, text = normal_check(link)
+
+    if not ok:
+        time.sleep(5)
+        ok, text = deep_check(link)
+
+    issue = None
+    if not ok:
+        issue = "Link Down"
     else:
-        print(f"✅ {name} is Active.")
+        for w in BROKEN_WORDS:
+            if w in text:
+                issue = f"Issue detected: {w}"
+                break
 
-    time.sleep(1) # Chhota gap requests ke beech
+    if issue:
+        tg(
+            f"🚨 LINK ALERT\n\n"
+            f"👤 {name}\n"
+            f"📸 @{insta}\n"
+            f"🔗 {link_name}\n"
+            f"🌐 {link}\n"
+            f"📞 {phone}\n"
+            f"⚠️ {issue}"
+        )
 
-print("✅ All tasks finished!")
+    time.sleep(2)
+
+print("✅ Scan Complete")
