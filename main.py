@@ -3,9 +3,15 @@ from datetime import datetime, timedelta
 
 # ================= CONFIG =================
 SHEET_URL = os.getenv("SHEET_URL")
-SCRAPER_API_KEY = os.getenv("SCRAPER_KEY")
-TG_TOKEN = os.getenv("TELEGRAM_TOKEN")
-TG_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+SCRAPER_API_KEY = os.getenv("SCRAPER_API_KEY")
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+
+# --- Safety checks ---
+assert SHEET_URL, "SHEET_URL missing"
+assert SCRAPER_API_KEY, "SCRAPER_API_KEY missing"
+assert TELEGRAM_TOKEN, "TELEGRAM_TOKEN missing"
+assert TELEGRAM_CHAT_ID, "TELEGRAM_CHAT_ID missing"
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (LinkGuardBot/1.0)"
@@ -28,8 +34,8 @@ PLAN_DAYS = {
 
 # ================= HELPERS =================
 def tg(msg):
-    url = f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage"
-    requests.post(url, data={"chat_id": TG_CHAT_ID, "text": msg})
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    requests.post(url, data={"chat_id": TELEGRAM_CHAT_ID, "text": msg})
 
 def normal_check(url):
     try:
@@ -53,7 +59,6 @@ def expired(plan, join_date):
 # ================= ENGINE =================
 print("🚀 LinkGuard Scanner Started")
 
-rows = []
 csv_data = requests.get(SHEET_URL).content.decode("utf-8")
 rows = list(csv.DictReader(csv_data.splitlines()))
 
@@ -72,21 +77,26 @@ for row in rows:
     if expired(plan, join_date):
         continue
 
+    # -------- DOUBLE CHECK LOGIC --------
     ok, text = normal_check(link)
 
     if not ok:
-        time.sleep(5)
+        time.sleep(25)
+        ok, text = normal_check(link)
+
+    if not ok:
         ok, text = deep_check(link)
 
     issue = None
     if not ok:
-        issue = "Link Down"
+        issue = "Link completely unreachable"
     else:
         for w in BROKEN_WORDS:
             if w in text:
                 issue = f"Issue detected: {w}"
                 break
 
+    # -------- REPEAT ALERT MODE --------
     if issue:
         tg(
             f"🚨 LINK ALERT\n\n"
